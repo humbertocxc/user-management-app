@@ -15,6 +15,10 @@ model User {
   name      String
   email     String   @unique
   password  String
+  zipCode   String?
+  bairro    String?
+  city      String?
+  state     String?
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

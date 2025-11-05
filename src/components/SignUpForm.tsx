@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import bcrypt from "bcryptjs";
 import { signUpSchema } from "@/lib/validation/signupSchema";
 import { signUpDefaultValues } from "@/lib/validation/signupDefaults";
 import {
@@ -18,12 +17,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AddressData } from "@/lib/services/address/cep-service";
 import { CepField } from "./CepField";
+import { useApi } from "@/context/ApiProvider";
 
 export default function SignUpForm() {
   const form = useForm({
     resolver: zodResolver(signUpSchema),
     defaultValues: signUpDefaultValues,
   });
+
+  const { registerUser } = useApi();
 
   const handleAddressFetched = (addressData: AddressData | null) => {
     if (addressData) {
@@ -34,24 +36,22 @@ export default function SignUpForm() {
   };
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-    const user = {
-      name: data.name,
-      email: data.email,
-      password: hashedPassword,
-      zipCode: data.zipCode,
-      bairro: data.bairro,
-      city: data.city,
-      state: data.state,
-    };
-    console.log("User data:", user);
+    try {
+      const result = await registerUser(data);
+      console.log("User registered successfully:", result);
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   };
 
   return (
     <div className="max-w-md lg:max-w-4xl mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-4">Cadastro</h1>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+        >
           <div className="space-y-4">
             <FormField
               control={form.control}
