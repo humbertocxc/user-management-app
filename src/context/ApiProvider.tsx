@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, ReactNode } from "react";
+import { SessionProvider, signIn } from "next-auth/react";
 
 interface SignUpData {
   name: string;
@@ -49,12 +50,22 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(error.error || "Registration failed");
     }
 
-    return response.json();
+    const result = await response.json();
+
+    await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    return result;
   };
 
   return (
-    <ApiContext.Provider value={{ registerUser }}>
-      {children}
-    </ApiContext.Provider>
+    <SessionProvider>
+      <ApiContext.Provider value={{ registerUser }}>
+        {children}
+      </ApiContext.Provider>
+    </SessionProvider>
   );
 };
