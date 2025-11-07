@@ -55,9 +55,10 @@ export function UserTableRow({
               value={editName}
               onChange={(e) => onEditNameChange(e.target.value)}
               className="w-32"
+              disabled={isUpdating}
             />
             <Button size="sm" onClick={onSaveEdit} disabled={isUpdating}>
-              Salvar
+              {isUpdating ? "Salvando..." : "Salvar"}
             </Button>
             <Button
               size="sm"
@@ -86,8 +87,12 @@ export function UserTableRow({
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button size="sm" variant="destructive" disabled={isDeleting}>
-                <Trash2 className="h-4 w-4" />
+              <Button size="sm" variant="destructive" disabled={isDeleting || isEditing}>
+                {isDeleting ? (
+                  "Excluindo..."
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -99,12 +104,13 @@ export function UserTableRow({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => onDelete(user.id)}
+                  disabled={isDeleting}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  Excluir
+                  {isDeleting ? "Excluindo..." : "Excluir"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

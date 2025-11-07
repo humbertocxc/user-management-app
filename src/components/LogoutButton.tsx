@@ -10,7 +10,16 @@ export function LogoutButton() {
 
   const handleLogout = () => {
     setIsLoggingOut(true);
-    localStorage.clear();
+    
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('next-auth')) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
     signOut({ callbackUrl: "/" });
   };
 

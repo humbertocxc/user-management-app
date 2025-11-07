@@ -8,6 +8,7 @@ import { useUserEdit } from "@/lib/hooks/useUserEdit";
 import { useUserSearchSort } from "@/lib/hooks/useUserSearchSort";
 import { SearchInput } from "@/components/admin/SearchInput";
 import { UserTable } from "@/components/admin/UserTable";
+import { Alert } from "@/components/Alert";
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
     updateUser,
     isUpdating,
     isDeleting,
+    error,
   } = useUsers();
   const { editingId, editName, setEditName, startEdit, cancelEdit } =
     useUserEdit();
@@ -43,8 +45,14 @@ export default function AdminDashboard() {
 
   const handleSaveEdit = async () => {
     if (!editingId || !editName) return;
-    await updateUser(editingId, editName);
-    cancelEdit();
+    const result = await updateUser(editingId, editName);
+    if (result.success) {
+      cancelEdit();
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteUser(id);
   };
 
   if (status === "loading" || loading) {
@@ -67,6 +75,12 @@ export default function AdminDashboard() {
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Painel de Administração</h1>
 
+      {error && (
+        <div className="mb-4">
+          <Alert message={error} type="error" />
+        </div>
+      )}
+
       <div className="mb-4 flex items-center space-x-4">
         <SearchInput value={searchTerm} onChange={setSearchTerm} />
       </div>
@@ -82,7 +96,7 @@ export default function AdminDashboard() {
         onStartEdit={startEdit}
         onSaveEdit={handleSaveEdit}
         onCancelEdit={cancelEdit}
-        onDelete={deleteUser}
+        onDelete={handleDelete}
         isUpdating={isUpdating}
         isDeleting={isDeleting}
       />

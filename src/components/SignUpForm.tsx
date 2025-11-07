@@ -19,9 +19,17 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { AddressData } from "@/lib/services/address/cep-service";
 import { CepField } from "./CepField";
 import { useApi } from "@/context/ApiProvider";
+import { Alert } from "./Alert";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SignUpForm() {
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<{
+    message: string;
+    type?: "success" | "error" | "info";
+  } | null>(null);
+
   const form = useForm({
     resolver: zodResolver(signUpSchema),
     defaultValues: signUpDefaultValues,
@@ -39,24 +47,38 @@ export default function SignUpForm() {
   };
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
+    setLoading(true);
+    setAlert(null);
+
     try {
       const result = await registerUser(data);
-      console.log("User registered successfully:", result);
+      setAlert({ message: "Usuário cadastrado com sucesso!", type: "success" });
+      
       const user = result?.user;
       if (user) {
         try {
           localStorage.setItem("user", JSON.stringify(user));
         } catch {}
-        router.push("/");
+        
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      } else {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Registration failed:", error);
+    } catch {
+      setAlert({
+        message: "Falha no cadastro. Tente novamente.",
+        type: "error",
+      });
+      setLoading(false);
     }
   };
 
   return (
     <div className="max-w-md lg:max-w-4xl mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-4">Cadastro</h1>
+      {alert && <Alert message={alert.message} type={alert.type} />}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -70,7 +92,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Seu nome" {...field} />
+                    <Input placeholder="Seu nome" {...field} disabled={loading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -83,7 +105,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>E-mail</FormLabel>
                   <FormControl>
-                    <Input placeholder="Seu e-mail" {...field} />
+                    <Input placeholder="Seu e-mail" {...field} disabled={loading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -96,7 +118,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <PasswordInput placeholder="Sua senha" {...field} />
+                    <PasswordInput placeholder="Sua senha" {...field} disabled={loading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,6 +134,7 @@ export default function SignUpForm() {
                     <PasswordInput
                       placeholder="Confirme sua senha"
                       {...field}
+                      disabled={loading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -131,7 +154,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Estado</FormLabel>
                   <FormControl>
-                    <Input placeholder="Seu estado" {...field} />
+                    <Input placeholder="Seu estado" {...field} disabled={loading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -144,7 +167,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Cidade</FormLabel>
                   <FormControl>
-                    <Input placeholder="Sua cidade" {...field} />
+                    <Input placeholder="Sua cidade" {...field} disabled={loading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -157,7 +180,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Bairro</FormLabel>
                   <FormControl>
-                    <Input placeholder="Seu bairro" {...field} />
+                    <Input placeholder="Seu bairro" {...field} disabled={loading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -167,10 +190,10 @@ export default function SignUpForm() {
           <div className="col-span-full mt-4">
             <Button
               type="submit"
-              disabled={form.formState.isSubmitting}
+              disabled={loading}
               className="w-full bg-gray-900 text-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
             >
-              Cadastrar
+              {loading ? "Processando..." : "Cadastrar"}
             </Button>
           </div>
         </form>

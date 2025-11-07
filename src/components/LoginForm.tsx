@@ -16,8 +16,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { signIn } from "next-auth/react";
+import { Alert } from "@/components/Alert";
+import { useState } from "react";
 
 export default function LoginForm() {
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<{
+    message: string;
+    type?: "success" | "error" | "info";
+  } | null>(null);
+
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -27,24 +35,44 @@ export default function LoginForm() {
   });
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+    setLoading(true);
+    setAlert(null);
+    
     try {
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: true,
-        callbackUrl: "/",
+        redirect: false,
       });
+
       if (result?.error) {
-        console.error("Login failed:", result.error);
+        setAlert({
+          message: "Credenciais inválidas. Por favor, tente novamente.",
+          type: "error",
+        });
+        setLoading(false);
+      } else if (result?.ok) {
+        setAlert({
+          message: "Login realizado com sucesso!",
+          type: "success",
+        });
+        setTimeout(() => {
+          window.location.href = result.url || "/";
+        }, 500);
       }
-    } catch (error) {
-      console.error("Login failed:", error);
+    } catch {
+      setAlert({
+        message: "Erro no servidor. Por favor, tente novamente.",
+        type: "error",
+      });
+      setLoading(false);
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-4">Login</h1>
+      {alert && <Alert message={alert.message} type={alert.type} />}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -54,7 +82,7 @@ export default function LoginForm() {
               <FormItem>
                 <FormLabel>E-mail</FormLabel>
                 <FormControl>
-                  <Input placeholder="Seu e-mail" {...field} />
+                  <Input placeholder="Seu e-mail" {...field} disabled={loading} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -67,7 +95,7 @@ export default function LoginForm() {
               <FormItem>
                 <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <PasswordInput placeholder="Sua senha" {...field} />
+                  <PasswordInput placeholder="Sua senha" {...field} disabled={loading} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -75,10 +103,10 @@ export default function LoginForm() {
           />
           <Button
             type="submit"
-            disabled={form.formState.isSubmitting}
+            disabled={loading}
             className="w-full bg-gray-900 text-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
           >
-            Entrar
+            {loading ? "Processando..." : "Entrar"}
           </Button>
         </form>
       </Form>

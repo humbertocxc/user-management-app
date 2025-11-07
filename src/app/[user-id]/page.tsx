@@ -28,7 +28,7 @@ export default function DashboardPage() {
     if (status === "loading") return;
 
     if (!session) {
-      router.push("/login");
+      router.push("/");
       return;
     }
 
@@ -36,7 +36,7 @@ export default function DashboardPage() {
       .then(setUserData)
       .catch((err) => {
         console.error(err);
-        router.push("/login");
+        router.push("/");
       })
       .finally(() => setLoading(false));
   }, [session, status, router, getUserData]);

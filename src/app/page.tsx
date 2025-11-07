@@ -22,17 +22,14 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "authenticated" && session) {
-      const userId =
-        session.user?.id ??
-        (typeof window !== "undefined" && localStorage.getItem("user")
-          ? JSON.parse(localStorage.getItem("user") as string)?.id
-          : null);
-      if (userId) {
-        router.push(`/${userId}`);
-      } else {
-        router.push("/dashboard");
-      }
+    if (status !== "authenticated") {
+      return;
+    }
+
+    const userId = session?.user?.id;
+
+    if (userId) {
+      router.replace(`/${userId}`);
     }
   }, [session, status, router]);
 
