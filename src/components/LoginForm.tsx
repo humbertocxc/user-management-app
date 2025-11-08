@@ -57,7 +57,7 @@ export default function LoginForm() {
           type: "success",
         });
         setTimeout(() => {
-          window.location.href = result.url || "/";
+          window.location.href = "/";
         }, 500);
       }
     } catch {

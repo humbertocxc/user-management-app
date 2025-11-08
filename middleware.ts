@@ -4,10 +4,13 @@ import { NextResponse } from "next/server";
 const authMw = withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
-    const isAdminDashboard = req.nextUrl.pathname.startsWith("/admin-dashboard");
+    const isAdminDashboard =
+      req.nextUrl.pathname.startsWith("/admin-dashboard");
 
     if (isAdminDashboard && token?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL(`/${token?.id}`, req.url));
+      return NextResponse.redirect(
+        new URL(`/${token?.id}`, process.env.APP_URL || req.nextUrl.origin)
+      );
     }
 
     return NextResponse.next();
