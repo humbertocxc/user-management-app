@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 const dbUrl = process.env.DATABASE_URL;
-if (dbUrl && dbUrl.startsWith("file:")) {
+if (dbUrl && dbUrl.startsWith("file:") && !process.env.BUILD_TIME) {
   const dbPath = path.resolve(dbUrl.slice(5));
   if (!fs.existsSync(dbPath)) {
     console.log("Database not found, initializing...");

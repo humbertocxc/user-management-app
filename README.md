@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 👥 Sistema de Gerenciamento de Usuários
 
-## Getting Started
+Aplicação fullstack de gerenciamento de usuários desenvolvida com Next.js, Prisma e NextAuth.
 
-First, run the development server:
+## 🚀 Como Executar
+
+### Pré-requisitos
+
+- Node.js 20 ou superior
+- pnpm (gerenciador de pacotes)
+- Docker (opcional, para execução containerizada)
+
+### Opção 1: Executar Localmente
+
+#### 1. Instalar Dependências
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### 2. Configurar Variáveis de Ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Crie um arquivo `.env` na raiz do projeto:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+DATABASE_URL="file:./dev.db"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="sua-chave-secreta-aqui"
+```
 
-## Learn More
+#### 3. Configurar Banco de Dados
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Tornar o script executável
+chmod +x setup-db.sh
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Executar configuração do banco
+./setup-db.sh
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+#### 4. Executar a Aplicação
 
-## Deploy on Vercel
+**Modo Desenvolvimento:**
+```bash
+pnpm dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Modo Produção:**
+```bash
+pnpm build
+pnpm start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Acesse [http://localhost:3000](http://localhost:3000) no navegador.
+
+### Opção 2: Executar com Docker
+
+#### Build da Imagem
+
+```bash
+docker build -t user-management-app .
+```
+
+#### Executar Container
+
+```bash
+docker run -p 3000:3000 user-management-app
+```
+
+A aplicação estará disponível em [http://localhost:3000](http://localhost:3000).
+
+## 📝 Scripts Disponíveis
+
+```bash
+pnpm dev       # Inicia servidor de desenvolvimento
+pnpm build     # Compila a aplicação para produção
+pnpm start     # Inicia servidor de produção
+pnpm lint      # Executa o linter
+pnpm seed      # Popula o banco de dados
+```
+
+## �️ Comandos Úteis do Prisma
+
+```bash
+# Visualizar banco de dados
+npx prisma studio
+
+# Resetar banco de dados
+npx prisma migrate reset
+
+# Criar nova migração
+npx prisma migrate dev --name nome_da_migracao
+```
+
+## 🔑 Funcionalidades
+
+- ✅ Autenticação de usuários (login/cadastro)
+- ✅ Gerenciamento de perfis
+- ✅ Dashboard administrativo
+- ✅ CRUD completo de usuários
+- ✅ Validação de CEP integrada
+- ✅ Tema claro/escuro
+- ✅ API REST
+
+## � Tecnologias
+
+- **Next.js 16** - Framework React para produção
+- **React 19** - Biblioteca para interfaces
+- **TypeScript** - Tipagem estática
+- **Prisma** - ORM para banco de dados
+- **NextAuth** - Autenticação
+- **SQLite** - Banco de dados
+- **Tailwind CSS** - Estilização
+- **Zod** - Validação de schemas
+- **React Hook Form** - Gerenciamento de formulários
+
+## 📄 Licença
+
+Este projeto é privado e de uso restrito.

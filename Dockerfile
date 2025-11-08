@@ -14,8 +14,9 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 ENV NODE_ENV=production
+ENV BUILD_TIME=true
 
-RUN chmod +x scripts/setup-db.sh && ./scripts/setup-db.sh
+RUN npx prisma generate
 
 RUN pnpm build
 
@@ -30,12 +31,15 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/setup-db.sh ./setup-db.sh
 COPY --from=builder /app/.env ./.env
 COPY --from=builder /app/.env.local ./.env.local
+
+RUN chmod +x setup-db.sh
 
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-CMD ["pnpm", "start"]
+CMD ["sh", "-c", "./setup-db.sh && pnpm start"]
