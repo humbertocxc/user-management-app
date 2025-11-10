@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
 
 export async function DELETE(
   request: NextRequest,
@@ -10,6 +11,19 @@ export async function DELETE(
   if (authError) return authError;
 
   const { id } = await params;
+
+  try {
+    const session = await getServerSession(authOptions);
+    const currentUserId = session?.user?.id as string | undefined;
+    if (currentUserId && currentUserId === id) {
+      return NextResponse.json(
+        { error: "Erro! Não é possível deletar uma conta de administrador!" },
+        { status: 403 }
+      );
+    }
+  } catch (error) {
+    console.error("Failed to get session:", error);
+  }
 
   try {
     const user = await prisma.user.findUnique({

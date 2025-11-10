@@ -21,7 +21,12 @@ export const signUpSchema = z
     city: z.string().optional(),
     state: z.string().optional(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "As senhas devem coincidir",
-    path: ["confirmPassword"],
+  .superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: "custom",
+        message: "As senhas devem coincidir",
+        path: ["confirmPassword"],
+      });
+    }
   });

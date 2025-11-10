@@ -55,8 +55,9 @@ export default function DashboardPage() {
               <Button
                 onClick={() => router.push("/admin-dashboard")}
                 className="bg-blue-600 hover:bg-blue-700"
+                disabled={loading}
               >
-                Admin Dashboard
+                Painel de admin
               </Button>
             </div>
           )}

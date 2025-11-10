@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 import { signIn } from "next-auth/react";
 
 interface SignUpData {
@@ -38,6 +38,7 @@ interface ApiContextType {
     data: Omit<SignUpData, "confirmPassword">
   ) => Promise<RegisterResponse>;
   getUserData: () => Promise<UserData>;
+  currentUserId: string | null;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -49,6 +50,19 @@ export const useApi = () => {
 };
 
 export const ApiProvider = ({ children }: { children: ReactNode }) => {
+  const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const resp = await fetch("/api/user/me");
+        if (resp.ok) {
+          const me = await resp.json();
+          setCurrentUserId(me.id);
+        }
+      } catch {}
+    })();
+  }, []);
   const registerUser = async (data: Omit<SignUpData, "confirmPassword">) => {
     const response = await fetch("/api/signup", {
       method: "POST",
@@ -94,7 +108,7 @@ export const ApiProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <ApiContext.Provider value={{ registerUser, getUserData }}>
+    <ApiContext.Provider value={{ registerUser, getUserData, currentUserId }}>
       {children}
     </ApiContext.Provider>
   );

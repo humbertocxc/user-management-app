@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -13,6 +14,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Pencil, Trash2 } from "lucide-react";
+import { Alert } from "@/components/Alert";
+import { useApi } from "@/context/ApiProvider";
 
 interface User {
   id: string;
@@ -32,6 +35,7 @@ interface UserTableRowProps {
   onDelete: (id: string) => void;
   isUpdating: boolean;
   isDeleting: boolean;
+  currentUserId?: string | null;
 }
 
 export function UserTableRow({
@@ -46,8 +50,27 @@ export function UserTableRow({
   isUpdating,
   isDeleting,
 }: UserTableRowProps) {
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const { currentUserId } = useApi();
+
+  const handleDelete = async (id: string) => {
+    setErrorMessage(null);
+    try {
+      await onDelete(id);
+    } catch {
+      setErrorMessage("Falha ao excluir usuário. Por favor, tente novamente.");
+    }
+  };
+
   return (
     <TableRow>
+      {errorMessage && (
+        <TableCell colSpan={4}>
+          <div className="mb-2">
+            <Alert message={errorMessage} type="error" />
+          </div>
+        </TableCell>
+      )}
       <TableCell>
         {isEditing ? (
           <div className="flex items-center space-x-2">
@@ -87,9 +110,19 @@ export function UserTableRow({
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button size="sm" variant="destructive" disabled={isDeleting || isEditing}>
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={
+                  isDeleting ||
+                  isEditing ||
+                  !!(currentUserId && currentUserId === user.id)
+                }
+              >
                 {isDeleting ? (
                   "Excluindo..."
+                ) : currentUserId && currentUserId === user.id ? (
+                  "Excluir (você)"
                 ) : (
                   <Trash2 className="h-4 w-4" />
                 )}
@@ -104,10 +137,14 @@ export function UserTableRow({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel disabled={isDeleting}>
+                  Cancelar
+                </AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => onDelete(user.id)}
-                  disabled={isDeleting}
+                  onClick={() => handleDelete(user.id)}
+                  disabled={
+                    isDeleting || !!(currentUserId && currentUserId === user.id)
+                  }
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   {isDeleting ? "Excluindo..." : "Excluir"}
